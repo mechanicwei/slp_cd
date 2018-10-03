@@ -3,9 +3,10 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"slp_cd/model"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
