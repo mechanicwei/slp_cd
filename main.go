@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"slp_cd/model"
 	"strings"
 )
 
@@ -17,7 +18,15 @@ func main() {
 		if err != nil {
 			return
 		}
-		fmt.Printf("Deploying %s with %s", server, branch)
+
+		deployServer := model.FindServerByNameAndBranch(server, branch)
+
+		if deployServer.ID != 0 {
+			fmt.Printf("Deploying %s with %s", server, branch)
+		} else {
+			fmt.Printf("Can't find a server for %s with %s branch", server, branch)
+			return
+		}
 
 		c.JSON(200, gin.H{
 			"status": "received",
