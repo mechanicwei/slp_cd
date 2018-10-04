@@ -16,13 +16,27 @@ type DeployRecord struct {
 
 func (dc *DeployRecord) Save() bool {
 	db := GetDBConn()
-	insertSql := "INSERT INTO deploy_records (status, server_id, commit, created_at) VALUES ($1, $2, $3, $4)"
-	result, err := db.Exec(insertSql, dc.Status, dc.ServerID, dc.Commit, dc.CreatedAt.Format(time.RFC3339))
+	insertSql := "INSERT INTO deploy_records (status, server_id, commit, created_at) VALUES ($1, $2, $3, $4) RETURNING id"
+	err := db.QueryRow(insertSql, dc.Status, dc.ServerID, dc.Commit, dc.CreatedAt.Format(time.RFC3339)).Scan(&dc.ID)
 	if err != nil {
 		log.Printf("SaveDeployRecord failed: %v", err)
 		return false
 	}
-
-	dc.ID, _ = result.LastInsertId()
 	return true
+}
+
+func (dc *DeployRecord) Exec() bool {
+	log.Printf("Exec DeployRecord #%d\n", dc.ID)
+	return true
+}
+
+func FindDeployRecordByID(id int64) *DeployRecord {
+	db := GetDBConn()
+	dr := DeployRecord{}
+	row := db.QueryRow("SELECT * FROM deploy_records WHERE id=$1", id)
+	queryErr := row.Scan(&dr.ID, &dr.Status, &dr.ServerID, &dr.Commit, &dr.CreatedAt)
+	if queryErr != nil {
+		log.Println(queryErr)
+	}
+	return &dr
 }

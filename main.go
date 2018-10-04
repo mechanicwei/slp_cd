@@ -10,8 +10,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var DeployQueue = make(chan int64)
+
 func main() {
 	router := gin.Default()
+
+	go consumeDeployQueue()
 
 	router.POST("/deploy/:server", func(c *gin.Context) {
 		server := c.Param("server")
@@ -24,7 +28,7 @@ func main() {
 		deployServer := model.FindServerByNameAndBranch(server, branch)
 
 		if deployServer.ID == 0 {
-			fmt.Printf("Can't find a server for %s with %s branch", server, branch)
+			fmt.Printf("Can't find a server for %s with %s branch\n", server, branch)
 			return
 		}
 		fmt.Printf("Deploying %s with %s", server, branch)
@@ -40,6 +44,8 @@ func main() {
 			return
 		}
 
+		DeployQueue <- deployRecord.ID
+
 		c.JSON(200, gin.H{
 			"status": "received",
 		})
@@ -53,5 +59,16 @@ func getBranch(ref string) (string, error) {
 		return s[2], nil
 	} else {
 		return "", errors.New("no branch")
+	}
+}
+
+func consumeDeployQueue() {
+	var deployRecordID int64
+	for {
+		select {
+		case deployRecordID = <-DeployQueue:
+			deployRecord := model.FindDeployRecordByID(deployRecordID)
+			deployRecord.Exec()
+		}
 	}
 }
