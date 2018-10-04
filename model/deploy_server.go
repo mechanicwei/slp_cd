@@ -1,11 +1,23 @@
 package model
 
 import (
-	"bytes"
 	"log"
+	"os"
 	"os/exec"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
+
+var DeployLogger = logrus.New()
+
+func init() {
+	f, err := os.OpenFile("deploy.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	DeployLogger.Out = f
+}
 
 type DeployServer struct {
 	ID        int64     `json:"id"`
@@ -39,19 +51,19 @@ func FindDeployServerByID(id int64) *DeployServer {
 }
 
 func (ds *DeployServer) runCmd() bool {
+	contextLogger := DeployLogger.WithFields(logrus.Fields{
+		"DeployServer": ds.ID,
+	})
+
+	contextLogger.Info("Deploy starting")
 	cmd := exec.Command(ds.Cmd)
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
 
 	cmd.Dir = ds.Dir
 	err := cmd.Run()
 	if err != nil {
-		log.Printf("DeployServer #%d failed to run: %v\n", ds.ID, err)
+		contextLogger.Warn(err)
 		return false
 	}
-
-	// fmt.Printf("out:\n%s\nerr:\n%s\n", stdout.String(), stderr.String())
-
+	contextLogger.Info("Deploy done")
 	return true
 }
