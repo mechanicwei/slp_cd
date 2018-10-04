@@ -14,6 +14,10 @@ type DeployRecord struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+func (dc *DeployRecord) DeployServer() *DeployServer {
+	return FindDeployServerByID(dc.ServerID)
+}
+
 func (dc *DeployRecord) Save() bool {
 	db := GetDBConn()
 	insertSql := "INSERT INTO deploy_records (status, server_id, commit, created_at) VALUES ($1, $2, $3, $4) RETURNING id"
@@ -25,9 +29,31 @@ func (dc *DeployRecord) Save() bool {
 	return true
 }
 
-func (dc *DeployRecord) Exec() bool {
-	log.Printf("Exec DeployRecord #%d\n", dc.ID)
+func (dc *DeployRecord) UpdateStatus(newStatus string) bool {
+	db := GetDBConn()
+	updateSql := `
+		UPDATE deploy_records
+		SET status = $1
+		WHERE id=$2;
+	`
+	_, err := db.Exec(updateSql, newStatus, dc.ID)
+	if err != nil {
+		log.Printf("UpdateStatus failed: %v", err)
+		return false
+	}
+
 	return true
+}
+
+func (dc *DeployRecord) Exec() {
+	log.Printf("Exec DeployRecord #%d\n", dc.ID)
+	dc.UpdateStatus("processing")
+
+	if dc.DeployServer().runCmd() {
+		dc.UpdateStatus("processed")
+	} else {
+		dc.UpdateStatus("failed")
+	}
 }
 
 func FindDeployRecordByID(id int64) *DeployRecord {
