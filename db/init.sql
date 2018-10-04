@@ -14,3 +14,14 @@ WHERE
     NOT EXISTS (
         SELECT name FROM deploy_servers WHERE name = 'skylark'
     );
+
+CREATE TABLE IF NOT EXISTS deploy_records (
+    id serial PRIMARY KEY,
+    status  VARCHAR(50),
+    server_id BIGINT,
+    commit VARCHAR (255),
+    created_at timestamp without time zone
+);
+
+CREATE INDEX IF NOT EXISTS index_deploy_recoreds_on_server_id on deploy_records (server_id);
+CREATE INDEX IF NOT EXISTS index_deploy_recoreds_on_status on deploy_records (status);
