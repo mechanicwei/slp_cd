@@ -20,8 +20,13 @@ func (dc *DeployRecord) DeployServer() *DeployServer {
 
 func (dc *DeployRecord) Save() bool {
 	db := GetDBConn()
-	insertSql := "INSERT INTO deploy_records (status, server_id, commit, created_at) VALUES ($1, $2, $3, $4) RETURNING id"
-	err := db.QueryRow(insertSql, dc.Status, dc.ServerID, dc.Commit, dc.CreatedAt.Format(time.RFC3339)).Scan(&dc.ID)
+	insertSql := `
+		INSERT INTO deploy_records (status, server_id, commit, created_at)
+		VALUES (:status, :server_id, :commit, :created_at)
+		RETURNING id
+	`
+	nstmt, err := db.PrepareNamed(insertSql)
+	err = nstmt.Get(&dc.ID, dc)
 	if err != nil {
 		log.Printf("SaveDeployRecord failed: %v", err)
 		return false
