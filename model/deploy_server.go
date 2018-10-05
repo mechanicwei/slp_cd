@@ -25,7 +25,7 @@ type DeployServer struct {
 	Branch    string    `json:"branch"`
 	Dir       string    `json:"dir"`
 	Cmd       string    `json:"cmd"`
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
 func FindServerByNameAndBranch(name, branch string) *DeployServer {
@@ -42,8 +42,7 @@ func FindServerByNameAndBranch(name, branch string) *DeployServer {
 func FindDeployServerByID(id int64) *DeployServer {
 	db := GetDBConn()
 	dr := DeployServer{}
-	row := db.QueryRow("SELECT * FROM deploy_servers WHERE id=$1", id)
-	queryErr := row.Scan(&dr.ID, &dr.Name, &dr.Branch, &dr.Dir, &dr.Cmd, &dr.CreatedAt)
+	queryErr := db.Get(&dr, "SELECT * FROM deploy_servers WHERE id=$1", id)
 	if queryErr != nil {
 		log.Println(queryErr)
 	}

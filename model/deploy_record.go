@@ -9,9 +9,9 @@ import (
 type DeployRecord struct {
 	ID        int64     `json:"id"`
 	Status    string    `json:"status"`
-	ServerID  int64     `json:"server_id"`
+	ServerID  int64     `json:"server_id" db:"server_id"`
 	Commit    string    `json:"commit"`
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
 func (dc *DeployRecord) DeployServer() *DeployServer {
@@ -59,8 +59,7 @@ func (dc *DeployRecord) Exec() {
 func FindDeployRecordByID(id int64) *DeployRecord {
 	db := GetDBConn()
 	dr := DeployRecord{}
-	row := db.QueryRow("SELECT * FROM deploy_records WHERE id=$1", id)
-	queryErr := row.Scan(&dr.ID, &dr.Status, &dr.ServerID, &dr.Commit, &dr.CreatedAt)
+	queryErr := db.Get(&dr, "SELECT * FROM deploy_records WHERE id=$1", id)
 	if queryErr != nil {
 		log.Println(queryErr)
 	}

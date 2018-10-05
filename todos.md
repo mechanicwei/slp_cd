@@ -1,5 +1,6 @@
 - [x] 单独保存cmd输入日志
-- 引入https://github.com/jmoiron/sqlx
+- [x] 引入https://github.com/jmoiron/sqlx
 - 开发环境自动reload
 - 写测试
 - 增加配置文件，放数据库设置等私有信息
+- 存储push user

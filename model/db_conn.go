@@ -1,7 +1,7 @@
 package model
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 
 	"log"
@@ -9,8 +9,8 @@ import (
 
 const connStr string = "postgres://postgres@localhost:5432/slp_cd_db?sslmode=disable"
 
-func GetDBConn() *sql.DB {
-	db, err := sql.Open("postgres", connStr)
+func GetDBConn() *sqlx.DB {
+	db, err := sqlx.Open("postgres", connStr)
 
 	if err != nil {
 		log.Fatal(err)
