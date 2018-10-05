@@ -1,6 +1,8 @@
 - [x] 单独保存cmd输入日志
 - [x] 引入https://github.com/jmoiron/sqlx
-- 开发环境自动reload
+- [x] 开发环境自动reload, https://github.com/acoshift/goreload
 - 写测试
 - 增加配置文件，放数据库设置等私有信息
 - 存储push user
+- 引入https://github.com/golang-migrate/migrate
+- 引入go module
