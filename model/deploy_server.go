@@ -68,6 +68,22 @@ func (ds *DeployServer) Save() bool {
 	return true
 }
 
+func (ds *DeployServer) Update() bool {
+	db := GetDBConn()
+
+	updateSql := `
+		UPDATE deploy_servers
+		SET name=:name, branch=:branch, dir=:dir, cmd=:cmd
+		WHERE id = :id
+	`
+	_, err := db.NamedExec(updateSql, ds)
+	if err != nil {
+		log.Printf("updateDeployServer failed: %v", err)
+		return false
+	}
+	return true
+}
+
 func (ds *DeployServer) runCmd() bool {
 	contextLogger := DeployLogger.WithFields(logrus.Fields{
 		"DeployServer": ds.ID,

@@ -15,7 +15,9 @@ func main() {
 	go consumeDeployQueue()
 
 	router.POST("/deploy/:server", route.CreateDeployRecord(DeployQueue))
+
 	router.POST("/deploy_servers", route.CreateDeployServer)
+	router.PATCH("/deploy_servers/:id", route.UpdateDeployServer)
 	router.Run(":8080")
 }
 
