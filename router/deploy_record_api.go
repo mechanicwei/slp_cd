@@ -6,7 +6,6 @@ import (
 	"slp_cd/model"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,10 +28,9 @@ func CreateDeployRecord(DeployQueue chan int64) gin.HandlerFunc {
 		fmt.Printf("Deploying %s with %s", server, branch)
 
 		deployRecord := model.DeployRecord{
-			Status:    "waiting",
-			ServerID:  deployServer.ID,
-			Commit:    c.PostForm("head_commit"),
-			CreatedAt: time.Now(),
+			Status:   "waiting",
+			ServerID: deployServer.ID,
+			Commit:   c.PostForm("head_commit"),
 		}
 
 		if !deployRecord.Save() {

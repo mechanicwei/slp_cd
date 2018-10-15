@@ -21,12 +21,12 @@ func init() {
 }
 
 type DeployServer struct {
-	ID        int64     `json:"id"`
-	Name      string    `json:"name" binding:"required"`
-	Branch    string    `json:"branch" binding:"required"`
-	Dir       string    `json:"dir" binding:"required"`
-	Cmd       string    `json:"cmd" binding:"required"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	ID        int64    `json:"id"`
+	Name      string   `json:"name" binding:"required"`
+	Branch    string   `json:"branch" binding:"required"`
+	Dir       string   `json:"dir" binding:"required"`
+	Cmd       string   `json:"cmd" binding:"required"`
+	CreatedAt JsonTime `json:"created_at" db:"created_at"`
 }
 
 func FindServerByNameAndBranch(name, branch string) *DeployServer {
@@ -53,7 +53,7 @@ func FindDeployServerByID(id int64) *DeployServer {
 func (ds *DeployServer) Save() bool {
 	db := GetDBConn()
 	if ds.CreatedAt.IsZero() {
-		ds.CreatedAt = time.Now()
+		ds.CreatedAt = JsonTime{time.Now()}
 	}
 	insertSql := `
 		INSERT INTO deploy_servers (name, branch, dir, cmd, created_at)

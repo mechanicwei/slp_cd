@@ -7,11 +7,11 @@ import (
 
 // Valid status is in ["waiting", "processing", "processed", "failed"]
 type DeployRecord struct {
-	ID        int64     `json:"id"`
-	Status    string    `json:"status"`
-	ServerID  int64     `json:"server_id" db:"server_id"`
-	Commit    string    `json:"commit"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	ID        int64    `json:"id"`
+	Status    string   `json:"status"`
+	ServerID  int64    `json:"server_id" db:"server_id"`
+	Commit    string   `json:"commit"`
+	CreatedAt JsonTime `json:"created_at" db:"created_at"`
 }
 
 func (dc *DeployRecord) DeployServer() *DeployServer {
@@ -19,6 +19,10 @@ func (dc *DeployRecord) DeployServer() *DeployServer {
 }
 
 func (dc *DeployRecord) Save() bool {
+	if dc.CreatedAt.IsZero() {
+		dc.CreatedAt = JsonTime{time.Now()}
+	}
+
 	db := GetDBConn()
 	insertSql := `
 		INSERT INTO deploy_records (status, server_id, commit, created_at)
