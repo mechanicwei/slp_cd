@@ -21,10 +21,10 @@ func init() {
 
 type DeployServer struct {
 	ID        int64     `json:"id"`
-	Name      string    `json:"name"`
-	Branch    string    `json:"branch"`
-	Dir       string    `json:"dir"`
-	Cmd       string    `json:"cmd"`
+	Name      string    `json:"name" binding:"required"`
+	Branch    string    `json:"branch" binding:"required"`
+	Dir       string    `json:"dir" binding:"required"`
+	Cmd       string    `json:"cmd" binding:"required"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
@@ -47,6 +47,25 @@ func FindDeployServerByID(id int64) *DeployServer {
 		log.Println(queryErr)
 	}
 	return &dr
+}
+
+func (ds *DeployServer) Save() bool {
+	db := GetDBConn()
+	if ds.CreatedAt.IsZero() {
+		ds.CreatedAt = time.Now()
+	}
+	insertSql := `
+		INSERT INTO deploy_servers (name, branch, dir, cmd, created_at)
+		VALUES (:name, :dir, :branch, :cmd, :created_at)
+		RETURNING id
+	`
+	nstmt, err := db.PrepareNamed(insertSql)
+	err = nstmt.Get(&ds.ID, ds)
+	if err != nil {
+		log.Printf("SaveDeployServer failed: %v", err)
+		return false
+	}
+	return true
 }
 
 func (ds *DeployServer) runCmd() bool {
