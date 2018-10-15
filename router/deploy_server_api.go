@@ -39,6 +39,7 @@ func UpdateDeployServer(c *gin.Context) {
 		c.JSON(404, gin.H{
 			"error": message,
 		})
+		return
 	}
 
 	if err := c.ShouldBindJSON(&deployServer); err != nil {

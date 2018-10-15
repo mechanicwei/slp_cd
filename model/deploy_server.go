@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -82,6 +83,24 @@ func (ds *DeployServer) Update() bool {
 		return false
 	}
 	return true
+}
+
+func (ds *DeployServer) PaginatedDeployRecords(page, perPage int) []DeployRecord {
+	if page == 0 {
+		page = 1
+	}
+	if perPage == 0 {
+		perPage = 24
+	}
+
+	selectSql := `SELECT * FROM deploy_records WHERE server_id=$1 LIMIT $2 OFFSET $3`
+	deployRecords := []DeployRecord{}
+	db := GetDBConn()
+	err := db.Select(&deployRecords, selectSql, ds.ID, perPage, (page-1)*perPage)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return deployRecords
 }
 
 func (ds *DeployServer) runCmd() bool {

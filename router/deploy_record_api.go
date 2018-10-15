@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"slp_cd/model"
+	"strconv"
 	"strings"
 	"time"
 
@@ -44,6 +45,26 @@ func CreateDeployRecord(DeployQueue chan int64) gin.HandlerFunc {
 			"status": "received",
 		})
 	}
+}
+
+func GetDeployRecords(c *gin.Context) {
+	deployServerId, _ := strconv.ParseInt(c.Param("server_id"), 10, 64)
+	deployServer := model.FindDeployServerByID(deployServerId)
+
+	if deployServer.ID == 0 {
+		message := fmt.Sprintf("Can't find DeployServer with id %d", deployServerId)
+		c.JSON(404, gin.H{
+			"error": message,
+		})
+		return
+	}
+
+	page, _ := strconv.Atoi(c.Query("page"))
+	perPage, _ := strconv.Atoi(c.Query("per_page"))
+
+	deployRecords := deployServer.PaginatedDeployRecords(page, perPage)
+
+	c.JSON(200, deployRecords)
 }
 
 func getBranch(ref string) (string, error) {

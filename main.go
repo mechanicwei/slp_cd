@@ -18,6 +18,7 @@ func main() {
 
 	router.POST("/deploy_servers", route.CreateDeployServer)
 	router.PATCH("/deploy_servers/:id", route.UpdateDeployServer)
+	router.GET("/deploy_servers/:server_id/records", route.GetDeployRecords)
 	router.Run(":8080")
 }
 
