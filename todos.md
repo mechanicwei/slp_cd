@@ -6,3 +6,4 @@
 - 存储push user
 - 引入https://github.com/golang-migrate/migrate
 - 引入go module
+- api前缀

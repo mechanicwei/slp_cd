@@ -58,5 +58,10 @@ func UpdateDeployServer(c *gin.Context) {
 			"status": "failed",
 		})
 	}
+}
 
+func GetDeployServers(c *gin.Context) {
+	deployServers := model.AllDeployServers()
+
+	c.JSON(200, deployServers)
 }

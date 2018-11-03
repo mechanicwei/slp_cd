@@ -3,7 +3,9 @@ package main
 import (
 	"slp_cd/model"
 	route "slp_cd/router"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,8 +14,17 @@ var DeployQueue = make(chan int64)
 func main() {
 	router := gin.Default()
 
+	router.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true,
+		AllowMethods:     []string{"GET"},
+		AllowHeaders:     []string{"Authorization"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	go consumeDeployQueue()
 
+	router.GET("/deploy_servers", route.GetDeployServers)
 	router.POST("/deploy/:server", route.CreateDeployRecord(DeployQueue))
 
 	router.POST("/deploy_servers", route.CreateDeployServer)

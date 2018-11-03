@@ -85,6 +85,18 @@ func (ds *DeployServer) Update() bool {
 	return true
 }
 
+func AllDeployServers() []DeployServer {
+	selectSql := `SELECT * FROM deploy_servers ORDER BY id asc`
+	deployServers := []DeployServer{}
+	db := GetDBConn()
+	err := db.Select(&deployServers, selectSql)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	return deployServers
+}
+
 func (ds *DeployServer) PaginatedDeployRecords(page, perPage int) []DeployRecord {
 	if page == 0 {
 		page = 1
