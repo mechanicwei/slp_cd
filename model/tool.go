@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database/sql/driver"
 	"fmt"
 	"time"
 )
@@ -20,4 +21,8 @@ func (this *JsonTime) Scan(src interface{}) error {
 		*this = JsonTime{value}
 	}
 	return nil
+}
+
+func (this JsonTime) Value() (driver.Value, error) {
+	return this.Format("2006-01-02 15:04:05"), nil
 }

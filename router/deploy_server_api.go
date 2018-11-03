@@ -20,9 +20,7 @@ func CreateDeployServer(c *gin.Context) {
 	}
 
 	if deployServer.Save() {
-		c.JSON(201, gin.H{
-			"status": "created",
-		})
+		c.JSON(201, deployServer)
 	} else {
 		c.JSON(422, gin.H{
 			"status": "failed",
@@ -50,9 +48,7 @@ func UpdateDeployServer(c *gin.Context) {
 	}
 
 	if deployServer.Update() {
-		c.JSON(201, gin.H{
-			"status": "updated",
-		})
+		c.JSON(200, deployServer)
 	} else {
 		c.JSON(422, gin.H{
 			"status": "failed",
