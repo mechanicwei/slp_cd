@@ -17,19 +17,27 @@ func main() {
 	router.Use(cors.New(cors.Config{
 		AllowAllOrigins:  true,
 		AllowMethods:     []string{"GET", "PATCH", "POST"},
-		AllowHeaders:     []string{"Authorization"},
+		AllowHeaders:     []string{"Authorization", "Content-Type"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
 
 	go consumeDeployQueue()
 
-	router.GET("/deploy_servers", route.GetDeployServers)
-	router.POST("/deploy/:server", route.CreateDeployRecord(DeployQueue))
+	authMiddleware := route.NewAuthMiddleware()
+	router.POST("/login", authMiddleware.LoginHandler)
 
-	router.POST("/deploy_servers", route.CreateDeployServer)
-	router.PATCH("/deploy_servers/:id", route.UpdateDeployServer)
-	router.GET("/deploy_servers/:server_id/records", route.GetDeployRecords)
+	api := router.Group("/api")
+	api.Use(authMiddleware.MiddlewareFunc())
+	{
+		api.GET("/deploy_servers", route.GetDeployServers)
+		api.POST("/deploy/:server", route.CreateDeployRecord(DeployQueue))
+
+		api.POST("/deploy_servers", route.CreateDeployServer)
+		api.PATCH("/deploy_servers/:id", route.UpdateDeployServer)
+		api.GET("/deploy_servers/:server_id/records", route.GetDeployRecords)
+	}
+
 	router.Run(":8080")
 }
 
