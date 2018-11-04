@@ -18,6 +18,7 @@ func main() {
 		AllowAllOrigins:  true,
 		AllowMethods:     []string{"GET", "PATCH", "POST"},
 		AllowHeaders:     []string{"Authorization", "Content-Type"},
+		ExposeHeaders:    []string{"X-Pagination-Total"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))

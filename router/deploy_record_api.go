@@ -62,6 +62,9 @@ func GetDeployRecords(c *gin.Context) {
 
 	deployRecords := deployServer.PaginatedDeployRecords(page, perPage)
 
+	totalCount := strconv.Itoa(deployServer.TotalDeployRecordsCount())
+	c.Header("X-Pagination-Total", totalCount)
+
 	c.JSON(200, deployRecords)
 }
 

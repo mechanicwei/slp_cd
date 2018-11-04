@@ -115,6 +115,14 @@ func (ds *DeployServer) PaginatedDeployRecords(page, perPage int) []DeployRecord
 	return deployRecords
 }
 
+func (ds DeployServer) TotalDeployRecordsCount() int {
+	querySql := `SELECT count(*) FROM deploy_records WHERE server_id=$1`
+	db := GetDBConn()
+	var totalCount int
+	db.QueryRow(querySql, ds.ID).Scan(&totalCount)
+	return totalCount
+}
+
 func (ds *DeployServer) runCmd() bool {
 	contextLogger := DeployLogger.WithFields(logrus.Fields{
 		"DeployServer": ds.ID,
