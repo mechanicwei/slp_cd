@@ -2,8 +2,8 @@
 - [x] 引入https://github.com/jmoiron/sqlx
 - [x] 开发环境自动reload, https://github.com/acoshift/goreload
 - 写测试
-- 增加配置文件，放数据库设置等私有信息
+- [x] 增加配置文件，放数据库设置等私有信息
 - 存储push user
 - 引入https://github.com/golang-migrate/migrate
-- 引入go module
+- [x] 引入go modules
 - [x] api前缀

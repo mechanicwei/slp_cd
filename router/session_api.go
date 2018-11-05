@@ -6,11 +6,12 @@ import (
 
 	"github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
-const Username = "slp-cd"
-const Password = "slp-pw"
-const JWTSecretKey = "d9e71f6e08fdba5953a7ae924240ad71633bde221912874115930a0b37bd73d5edc1aa774bb5cb5615295113d98da7fdfb8a53fe04718fd5266dca5b0dc550b5"
+var userName = viper.GetString("username")
+var passWord = viper.GetString("password")
+var jwtSecretKey = viper.GetString("jwt_secret_key")
 
 type Login struct {
 	Username string `form:"username" json:"username" binding:"required"`
@@ -22,7 +23,7 @@ func NewAuthMiddleware() jwt.GinJWTMiddleware {
 
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "slp cd",
-		Key:         []byte(JWTSecretKey),
+		Key:         []byte(jwtSecretKey),
 		Timeout:     time.Hour,
 		MaxRefresh:  time.Hour,
 		IdentityKey: identityKey,
@@ -48,7 +49,7 @@ func NewAuthMiddleware() jwt.GinJWTMiddleware {
 			username := loginVals.Username
 			password := loginVals.Password
 
-			if username == Username && password == Password {
+			if username == userName && password == passWord {
 				return &Login{
 					Username: username,
 				}, nil

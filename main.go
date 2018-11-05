@@ -1,6 +1,8 @@
 package main
 
 import (
+	_ "slp_cd/config"
+
 	"slp_cd/model"
 	route "slp_cd/router"
 	"time"

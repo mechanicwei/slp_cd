@@ -1,2 +1,3 @@
 deploy.log
 .goreload
+config/settings.yml
