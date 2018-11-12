@@ -27,12 +27,18 @@ func CreateDeployRecord(DeployQueue chan int64) gin.HandlerFunc {
 		}
 		fmt.Printf("Deploying %s with %s", server, branch)
 
-		deployRecord := model.DeployRecord{
-			Status:   "waiting",
-			ServerID: deployServer.ID,
-			Commit:   c.PostForm("head_commit"),
-		}
+		var deployUser model.DeployUser
+		sender := c.PostFormMap("sender")
+		deployUser.Name = sender["login"]
+		deployUser.AvatarUrl = sender["avatar_url"]
+		deployUser.GithubUrl = sender["html_url"]
 
+		deployRecord := model.DeployRecord{
+			Status:     "waiting",
+			ServerID:   deployServer.ID,
+			Commit:     c.PostForm("head_commit"),
+			DeployUser: deployUser,
+		}
 		if !deployRecord.Save() {
 			return
 		}

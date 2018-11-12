@@ -29,12 +29,12 @@ func main() {
 
 	authMiddleware := route.NewAuthMiddleware()
 	router.POST("/login", authMiddleware.LoginHandler)
+	router.POST("/deploy/:server", route.CreateDeployRecord(DeployQueue))
 
 	api := router.Group("/api")
 	api.Use(authMiddleware.MiddlewareFunc())
 	{
 		api.GET("/deploy_servers", route.GetDeployServers)
-		api.POST("/deploy/:server", route.CreateDeployRecord(DeployQueue))
 
 		api.POST("/deploy_servers", route.CreateDeployServer)
 		api.PATCH("/deploy_servers/:id", route.UpdateDeployServer)
