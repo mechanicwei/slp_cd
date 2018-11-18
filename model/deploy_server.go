@@ -31,6 +31,7 @@ type DeployServer struct {
 
 func FindServerByNameAndBranch(name, branch string) *DeployServer {
 	db := GetDBConn()
+	defer db.Close()
 	deployServer := DeployServer{}
 	row := db.QueryRow("SELECT id FROM deploy_servers WHERE name = $1 and branch = $2", name, branch)
 	queryErr := row.Scan(&deployServer.ID)
@@ -42,6 +43,7 @@ func FindServerByNameAndBranch(name, branch string) *DeployServer {
 
 func FindDeployServerByID(id int64) *DeployServer {
 	db := GetDBConn()
+	defer db.Close()
 	dr := DeployServer{}
 	queryErr := db.Get(&dr, "SELECT * FROM deploy_servers WHERE id=$1", id)
 	if queryErr != nil {
@@ -52,6 +54,7 @@ func FindDeployServerByID(id int64) *DeployServer {
 
 func (ds *DeployServer) Save() bool {
 	db := GetDBConn()
+	defer db.Close()
 	if ds.CreatedAt.IsZero() {
 		ds.CreatedAt = JsonTime{time.Now()}
 	}
@@ -71,6 +74,7 @@ func (ds *DeployServer) Save() bool {
 
 func (ds *DeployServer) Update() bool {
 	db := GetDBConn()
+	defer db.Close()
 
 	updateSql := `
 		UPDATE deploy_servers
@@ -89,6 +93,7 @@ func AllDeployServers() []DeployServer {
 	selectSql := `SELECT * FROM deploy_servers ORDER BY id asc`
 	deployServers := []DeployServer{}
 	db := GetDBConn()
+	defer db.Close()
 	err := db.Select(&deployServers, selectSql)
 
 	if err != nil {
@@ -105,9 +110,10 @@ func (ds *DeployServer) PaginatedDeployRecords(page, perPage int) []DeployRecord
 		perPage = 24
 	}
 
-	selectSql := `SELECT * FROM deploy_records WHERE server_id=$1 LIMIT $2 OFFSET $3`
+	selectSql := `SELECT * FROM deploy_records WHERE server_id=$1 ORDER BY id desc LIMIT $2 OFFSET $3`
 	deployRecords := []DeployRecord{}
 	db := GetDBConn()
+	defer db.Close()
 	err := db.Select(&deployRecords, selectSql, ds.ID, perPage, (page-1)*perPage)
 	if err != nil {
 		fmt.Println(err)
@@ -118,6 +124,7 @@ func (ds *DeployServer) PaginatedDeployRecords(page, perPage int) []DeployRecord
 func (ds DeployServer) TotalDeployRecordsCount() int {
 	querySql := `SELECT count(*) FROM deploy_records WHERE server_id=$1`
 	db := GetDBConn()
+	defer db.Close()
 	var totalCount int
 	db.QueryRow(querySql, ds.ID).Scan(&totalCount)
 	return totalCount

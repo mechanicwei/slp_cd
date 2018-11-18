@@ -3,7 +3,7 @@
 - [x] 开发环境自动reload, https://github.com/acoshift/goreload
 - 写测试
 - [x] 增加配置文件，放数据库设置等私有信息
-- 存储push user
-- 引入https://github.com/golang-migrate/migrate
+- [x] 存储push user
+- [x] 引入https://github.com/golang-migrate/migrate
 - [x] 引入go modules
 - [x] api前缀
