@@ -7,3 +7,9 @@
 - [x] 引入https://github.com/golang-migrate/migrate
 - [x] 引入go modules
 - [x] api前缀
+- 部署命令自定义参数
+- 存储命令输出
+- DeployRepo
+- payload数据加密，以保证请求来自Github
+- 提醒：Skylark模板消息
+- head_commit -> compare
