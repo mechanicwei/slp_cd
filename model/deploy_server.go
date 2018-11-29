@@ -21,12 +21,13 @@ func init() {
 }
 
 type DeployServer struct {
-	ID        int64    `json:"id"`
-	Name      string   `json:"name" binding:"required"`
-	Branch    string   `json:"branch" binding:"required"`
-	Dir       string   `json:"dir" binding:"required"`
-	Cmd       string   `json:"cmd" binding:"required"`
-	CreatedAt JsonTime `json:"created_at" db:"created_at"`
+	ID           int64    `json:"id"`
+	Name         string   `json:"name" binding:"required"`
+	Branch       string   `json:"branch" binding:"required"`
+	Dir          string   `json:"dir" binding:"required"`
+	Cmd          string   `json:"cmd" binding:"required"`
+	DeployRepoID int64    `json:"deploy_repo_id" db:"deploy_repo_id" binding:"required"`
+	CreatedAt    JsonTime `json:"created_at" db:"created_at"`
 }
 
 func FindServerByNameAndBranch(name, branch string) *DeployServer {

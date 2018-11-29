@@ -6,3 +6,6 @@ CREATE TABLE deploy_repos (
     openids text[] DEFAULT '{}'::text[],
     created_at timestamp without time zone
 );
+
+ALTER TABLE deploy_servers ADD deploy_repo_id BIGINT;
+CREATE INDEX index_deploy_servers_on_deploy_repo_id on deploy_servers (deploy_repo_id);
