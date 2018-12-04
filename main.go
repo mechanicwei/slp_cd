@@ -34,10 +34,14 @@ func main() {
 	api := router.Group("/api")
 	api.Use(authMiddleware.MiddlewareFunc())
 	{
-		api.GET("/deploy_servers", route.GetDeployServers)
+		api.GET("/deploy_repos", route.GetDeployRepos)
+		api.POST("/deploy_repos", route.CreateDeployRepo)
+		api.PATCH("/deploy_repos/:id", route.UpdateDeployRepo)
 
+		api.GET("/deploy_repos/:repo_id/servers", route.GetDeployServers)
 		api.POST("/deploy_servers", route.CreateDeployServer)
 		api.PATCH("/deploy_servers/:id", route.UpdateDeployServer)
+
 		api.GET("/deploy_servers/:server_id/records", route.GetDeployRecords)
 	}
 

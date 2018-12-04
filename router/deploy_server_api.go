@@ -57,7 +57,8 @@ func UpdateDeployServer(c *gin.Context) {
 }
 
 func GetDeployServers(c *gin.Context) {
-	deployServers := model.AllDeployServers()
+	deployRepoId, _ := strconv.ParseInt(c.Param("repo_id"), 10, 64)
+	deployServers := model.FindDeployServersByRepoId(deployRepoId)
 
 	c.JSON(200, deployServers)
 }

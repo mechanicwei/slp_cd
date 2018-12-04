@@ -60,8 +60,8 @@ func (ds *DeployServer) Save() bool {
 		ds.CreatedAt = JsonTime{time.Now()}
 	}
 	insertSql := `
-		INSERT INTO deploy_servers (name, branch, dir, cmd, created_at)
-		VALUES (:name, :dir, :branch, :cmd, :created_at)
+		INSERT INTO deploy_servers (name, branch, dir, cmd, created_at, deploy_repo_id)
+		VALUES (:name, :dir, :branch, :cmd, :created_at, :deploy_repo_id)
 		RETURNING id
 	`
 	nstmt, err := db.PrepareNamed(insertSql)
@@ -147,4 +147,17 @@ func (ds *DeployServer) runCmd() bool {
 	}
 	contextLogger.Info("Deploy done")
 	return true
+}
+
+func FindDeployServersByRepoId(repoId int64) []DeployServer {
+	selectSql := `SELECT * FROM deploy_servers where deploy_repo_id=$1 ORDER BY id asc`
+	deployServers := []DeployServer{}
+	db := GetDBConn()
+	defer db.Close()
+	err := db.Select(&deployServers, selectSql, repoId)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	return deployServers
 }
