@@ -12,20 +12,20 @@ import (
 
 func CreateDeployRecord(DeployQueue chan int64) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		server := c.Param("server")
+		repoID, _ := strconv.ParseInt(c.Query("repo_id"), 10, 64)
 		ref := c.PostForm("ref")
 		branch, err := getBranch(ref)
 		if err != nil {
 			return
 		}
 
-		deployServer := model.FindServerByNameAndBranch(server, branch)
+		deployServer := model.FindServerByRepoIDAndBranch(repoID, branch)
 
 		if deployServer.ID == 0 {
-			fmt.Printf("Can't find a server for %s with %s branch\n", server, branch)
+			fmt.Printf("Can't find a server for #%d with %s branch\n", repoID, branch)
 			return
 		}
-		fmt.Printf("Deploying %s with %s", server, branch)
+		fmt.Printf("Deploying #%d with %s", repoID, branch)
 
 		var deployUser model.DeployUser
 		sender := c.PostFormMap("sender")
