@@ -3,22 +3,9 @@ package model
 import (
 	"fmt"
 	"log"
-	"os"
 	"os/exec"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
-
-var DeployLogger = logrus.New()
-
-func init() {
-	f, err := os.OpenFile("deploy.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("error opening file: %v", err)
-	}
-	DeployLogger.Out = f
-}
 
 type DeployServer struct {
 	ID           int64    `json:"id"`
@@ -133,22 +120,10 @@ func (ds DeployServer) TotalDeployRecordsCount() int {
 	return totalCount
 }
 
-func (ds *DeployServer) runCmd() bool {
-	contextLogger := DeployLogger.WithFields(logrus.Fields{
-		"DeployServer": ds.ID,
-	})
-
-	contextLogger.Info("Deploy starting")
+func (ds *DeployServer) buildCmd() *exec.Cmd {
 	cmd := exec.Command(ds.Cmd)
-
 	cmd.Dir = ds.Dir
-	err := cmd.Run()
-	if err != nil {
-		contextLogger.Warn(err)
-		return false
-	}
-	contextLogger.Info("Deploy done")
-	return true
+	return cmd
 }
 
 func FindDeployServersByRepoId(repoId int64) []DeployServer {

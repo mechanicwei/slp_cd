@@ -1,19 +1,36 @@
 package model
 
 import (
+	"bytes"
+	"database/sql"
 	"log"
+	"os"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
+
+var DeployLogger = logrus.New()
+
+func init() {
+	f, err := os.OpenFile("deploy.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	DeployLogger.Out = f
+}
 
 // Valid status is in ["waiting", "processing", "processed", "failed"]
 type DeployRecord struct {
-	ID         int64      `json:"id"`
-	Status     string     `json:"status"`
-	ServerID   int64      `json:"server_id" db:"server_id"`
-	Commit     string     `json:"commit"`
-	CreatedAt  JsonTime   `json:"created_at" db:"created_at"`
-	EndedAt    JsonTime   `json:"ended_at" db:"ended_at"`
-	DeployUser DeployUser `json:"deploy_user" db:"deploy_user"`
+	ID         int64          `json:"id"`
+	Status     string         `json:"status"`
+	ServerID   int64          `json:"server_id" db:"server_id"`
+	Commit     string         `json:"commit"`
+	CreatedAt  JsonTime       `json:"created_at" db:"created_at"`
+	EndedAt    JsonTime       `json:"ended_at" db:"ended_at"`
+	DeployUser DeployUser     `json:"deploy_user" db:"deploy_user"`
+	Stdout     sql.NullString `json:"stdout"`
+	Stderr     sql.NullString `json:"stderr"`
 }
 
 func (dc *DeployRecord) DeployServer() *DeployServer {
@@ -68,12 +85,27 @@ func (dc *DeployRecord) UpdateStatus(newStatus string) bool {
 func (dc *DeployRecord) Exec() {
 	log.Printf("Exec DeployRecord #%d\n", dc.ID)
 	dc.UpdateStatus("processing")
+	cmd := dc.DeployServer().buildCmd()
 
-	if dc.DeployServer().runCmd() {
-		dc.UpdateStatus("processed")
-	} else {
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	contextLogger := DeployLogger.WithFields(logrus.Fields{
+		"DeployServer": dc.ServerID,
+	})
+	contextLogger.Info("Deploy starting")
+
+	err := cmd.Run()
+	outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
+	if err != nil {
+		contextLogger.Warn(err)
 		dc.UpdateStatus("failed")
+	} else {
+		contextLogger.Info("Deploy done")
+		dc.UpdateStatus("processed")
 	}
+	dc.storeCmdLog(outStr, errStr)
 }
 
 func FindDeployRecordByID(id int64) *DeployRecord {
@@ -86,4 +118,21 @@ func FindDeployRecordByID(id int64) *DeployRecord {
 		log.Println(queryErr)
 	}
 	return &dr
+}
+
+func (dc *DeployRecord) storeCmdLog(outStr, errStr string) {
+	log.Printf("OUT: %s %s", outStr, errStr)
+
+	db := GetDBConn()
+	defer db.Close()
+
+	updateSql := `
+		UPDATE deploy_records
+		SET stdout = $1, stderr = $2
+		WHERE id=$3;
+	`
+	_, err := db.Exec(updateSql, outStr, errStr, dc.ID)
+	if err != nil {
+		log.Printf("storeCmdLog failed: %v", err)
+	}
 }
