@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"slp_cd/notification"
+	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -79,6 +81,7 @@ func (dc *DeployRecord) UpdateStatus(newStatus string) bool {
 		return false
 	}
 
+	dc.Status = newStatus
 	return true
 }
 
@@ -106,6 +109,7 @@ func (dc *DeployRecord) Exec() {
 		dc.UpdateStatus("processed")
 	}
 	dc.storeCmdLog(outStr, errStr)
+	dc.notify()
 }
 
 func FindDeployRecordByID(id int64) *DeployRecord {
@@ -121,8 +125,6 @@ func FindDeployRecordByID(id int64) *DeployRecord {
 }
 
 func (dc *DeployRecord) storeCmdLog(outStr, errStr string) {
-	log.Printf("OUT: %s %s", outStr, errStr)
-
 	db := GetDBConn()
 	defer db.Close()
 
@@ -134,5 +136,30 @@ func (dc *DeployRecord) storeCmdLog(outStr, errStr string) {
 	_, err := db.Exec(updateSql, outStr, errStr, dc.ID)
 	if err != nil {
 		log.Printf("storeCmdLog failed: %v", err)
+	}
+}
+
+func (dr *DeployRecord) notify() {
+	deployServer := dr.DeployServer()
+	deployRepo := deployServer.DeployRepo()
+
+	openidsArr := strings.Split(deployRepo.Openids, ";")
+	if len(openidsArr) == 0 {
+		return
+	}
+
+	options := make(map[string]string)
+	if dr.Status == "processed" {
+		options["first"] = "部署成功"
+	} else {
+		options["first"] = "部署失败"
+	}
+
+	options["keyword1"] = deployRepo.Name
+	options["keyword2"] = deployServer.Name
+	options["remark"] = "点击查看详情"
+
+	if notification.NotifyBySkylark(openidsArr, options) {
+		log.Printf("Succeed to notify admin of DeployServer#%d", dr.ServerID)
 	}
 }

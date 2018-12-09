@@ -2,3 +2,9 @@ username: admin
 password: admin
 jwt_secret_key: d9e71f6e08fdba5953a7ae924240ad71633bde221912874115930a0b37bd73d5edc1aa774bb5cb5615295113d98da7fdfb8a53fe04718fd5266dca5b0dc550b5
 pg_url: postgres://postgres@localhost:5432/slp_cd_db?sslmode=disable
+skylark_api:
+  push_url: https://beta.skylarkly.com/api/v4/pushes/wechat
+  client_id: test
+  client_secret: test
+  namespace_id: 1
+  template_id: test

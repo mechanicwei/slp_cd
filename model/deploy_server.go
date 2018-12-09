@@ -42,6 +42,10 @@ func FindDeployServerByID(id int64) *DeployServer {
 	return &dr
 }
 
+func (ds *DeployServer) DeployRepo() *DeployRepo {
+	return FindDeployRepoByID(ds.DeployRepoID)
+}
+
 func (ds *DeployServer) Save() bool {
 	db := GetDBConn()
 	defer db.Close()

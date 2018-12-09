@@ -4,6 +4,7 @@ require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/appleboy/gin-jwt v0.0.0-20180925135002-56d88c181ce9
 	github.com/buger/jsonparser v0.0.0-20181023193515-52c6e1462ebd // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/cors v0.0.0-20181008113111-488de3ec974f
 	github.com/gin-gonic/gin v1.3.0
 	github.com/jmoiron/sqlx v1.2.0
