@@ -15,6 +15,11 @@ type DeployServer struct {
 	Cmd          string   `json:"cmd" binding:"required"`
 	DeployRepoID int64    `json:"deploy_repo_id" db:"deploy_repo_id" binding:"required"`
 	CreatedAt    JsonTime `json:"created_at" db:"created_at"`
+	DeployRepo   *DeployRepo
+}
+
+func (ds *DeployServer) SetDeployRepo() {
+	ds.DeployRepo = FindDeployRepoByID(ds.DeployRepoID)
 }
 
 func FindServerByRepoIDAndBranch(repoID int64, branch string) *DeployServer {
@@ -40,10 +45,6 @@ func FindDeployServerByID(id int64) *DeployServer {
 		log.Println(queryErr)
 	}
 	return &dr
-}
-
-func (ds *DeployServer) DeployRepo() *DeployRepo {
-	return FindDeployRepoByID(ds.DeployRepoID)
 }
 
 func (ds *DeployServer) Save() bool {

@@ -24,19 +24,20 @@ func init() {
 
 // Valid status is in ["waiting", "processing", "processed", "failed"]
 type DeployRecord struct {
-	ID         int64          `json:"id"`
-	Status     string         `json:"status"`
-	ServerID   int64          `json:"server_id" db:"server_id"`
-	Commit     string         `json:"commit"`
-	CreatedAt  JsonTime       `json:"created_at" db:"created_at"`
-	EndedAt    JsonTime       `json:"ended_at" db:"ended_at"`
-	DeployUser DeployUser     `json:"deploy_user" db:"deploy_user"`
-	Stdout     sql.NullString `json:"stdout"`
-	Stderr     sql.NullString `json:"stderr"`
+	ID           int64          `json:"id"`
+	Status       string         `json:"status"`
+	ServerID     int64          `json:"server_id" db:"server_id"`
+	Commit       string         `json:"commit"`
+	CreatedAt    JsonTime       `json:"created_at" db:"created_at"`
+	EndedAt      JsonTime       `json:"ended_at" db:"ended_at"`
+	DeployUser   DeployUser     `json:"deploy_user" db:"deploy_user"`
+	Stdout       sql.NullString `json:"stdout"`
+	Stderr       sql.NullString `json:"stderr"`
+	DeployServer *DeployServer
 }
 
-func (dc *DeployRecord) DeployServer() *DeployServer {
-	return FindDeployServerByID(dc.ServerID)
+func (dc *DeployRecord) SetDeployServer() {
+	dc.DeployServer = FindDeployServerByID(dc.ServerID)
 }
 
 func (dc *DeployRecord) Save() bool {
@@ -88,7 +89,8 @@ func (dc *DeployRecord) UpdateStatus(newStatus string) bool {
 func (dc *DeployRecord) Exec() {
 	log.Printf("Exec DeployRecord #%d\n", dc.ID)
 	dc.UpdateStatus("processing")
-	cmd := dc.DeployServer().buildCmd()
+	dc.SetDeployServer()
+	cmd := dc.DeployServer.buildCmd()
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -140,8 +142,9 @@ func (dc *DeployRecord) storeCmdLog(outStr, errStr string) {
 }
 
 func (dr *DeployRecord) notify() {
-	deployServer := dr.DeployServer()
-	deployRepo := deployServer.DeployRepo()
+	deployServer := dr.DeployServer
+	deployServer.SetDeployRepo()
+	deployRepo := deployServer.DeployRepo
 
 	openidsArr := strings.Split(deployRepo.Openids, ";")
 	if len(openidsArr) == 0 {
