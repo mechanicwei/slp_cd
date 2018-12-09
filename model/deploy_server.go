@@ -4,17 +4,19 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"strings"
 	"time"
 )
 
 type DeployServer struct {
-	ID           int64    `json:"id"`
-	Name         string   `json:"name" binding:"required"`
-	Branch       string   `json:"branch" binding:"required"`
-	Dir          string   `json:"dir" binding:"required"`
-	Cmd          string   `json:"cmd" binding:"required"`
-	DeployRepoID int64    `json:"deploy_repo_id" db:"deploy_repo_id" binding:"required"`
-	CreatedAt    JsonTime `json:"created_at" db:"created_at"`
+	ID           int64      `json:"id"`
+	Name         string     `json:"name" binding:"required"`
+	Branch       string     `json:"branch" binding:"required"`
+	Dir          string     `json:"dir" binding:"required"`
+	Cmd          string     `json:"cmd" binding:"required"`
+	DeployRepoID int64      `json:"deploy_repo_id" db:"deploy_repo_id" binding:"required"`
+	CreatedAt    JsonTime   `json:"created_at" db:"created_at"`
+	Options      NullString `json:"options"`
 	DeployRepo   *DeployRepo
 }
 
@@ -54,8 +56,8 @@ func (ds *DeployServer) Save() bool {
 		ds.CreatedAt = JsonTime{time.Now()}
 	}
 	insertSql := `
-		INSERT INTO deploy_servers (name, branch, dir, cmd, created_at, deploy_repo_id)
-		VALUES (:name, :dir, :branch, :cmd, :created_at, :deploy_repo_id)
+		INSERT INTO deploy_servers (name, branch, dir, cmd, created_at, deploy_repo_id, :options)
+		VALUES (:name, :dir, :branch, :cmd, :created_at, :deploy_repo_id, :options)
 		RETURNING id
 	`
 	nstmt, err := db.PrepareNamed(insertSql)
@@ -73,7 +75,7 @@ func (ds *DeployServer) Update() bool {
 
 	updateSql := `
 		UPDATE deploy_servers
-		SET name=:name, branch=:branch, dir=:dir, cmd=:cmd
+		SET name=:name, branch=:branch, dir=:dir, cmd=:cmd, options=:options
 		WHERE id = :id
 	`
 	_, err := db.NamedExec(updateSql, ds)
@@ -128,6 +130,10 @@ func (ds DeployServer) TotalDeployRecordsCount() int {
 func (ds *DeployServer) buildCmd() *exec.Cmd {
 	cmd := exec.Command(ds.Cmd)
 	cmd.Dir = ds.Dir
+	if ds.Options.Valid {
+		cmd.Args = append(cmd.Args, strings.Split(ds.Options.String, " ")...)
+	}
+
 	return cmd
 }
 

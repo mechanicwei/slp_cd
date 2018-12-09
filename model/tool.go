@@ -1,7 +1,9 @@
 package model
 
 import (
+	"database/sql"
 	"database/sql/driver"
+	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -31,4 +33,30 @@ func (this *JsonTime) Scan(src interface{}) error {
 
 func (this JsonTime) Value() (driver.Value, error) {
 	return this.Format("2006-01-02 15:04:05"), nil
+}
+
+type NullString struct {
+	sql.NullString
+}
+
+func (v *NullString) MarshalJSON() ([]byte, error) {
+	if v.Valid {
+		return json.Marshal(v.String)
+	} else {
+		return json.Marshal(nil)
+	}
+}
+
+func (v *NullString) UnmarshalJSON(data []byte) error {
+	var s *string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	if s != nil {
+		v.Valid = true
+		v.String = *s
+	} else {
+		v.Valid = false
+	}
+	return nil
 }
