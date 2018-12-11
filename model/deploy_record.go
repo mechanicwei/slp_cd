@@ -2,7 +2,6 @@ package model
 
 import (
 	"bytes"
-	"database/sql"
 	"log"
 	"os"
 	"slp_cd/notification"
@@ -24,15 +23,15 @@ func init() {
 
 // Valid status is in ["waiting", "processing", "processed", "failed"]
 type DeployRecord struct {
-	ID           int64          `json:"id"`
-	Status       string         `json:"status"`
-	ServerID     int64          `json:"server_id" db:"server_id"`
-	Commit       string         `json:"commit"`
-	CreatedAt    JsonTime       `json:"created_at" db:"created_at"`
-	EndedAt      JsonTime       `json:"ended_at" db:"ended_at"`
-	DeployUser   DeployUser     `json:"deploy_user" db:"deploy_user"`
-	Stdout       sql.NullString `json:"stdout"`
-	Stderr       sql.NullString `json:"stderr"`
+	ID           int64      `json:"id"`
+	Status       string     `json:"status"`
+	ServerID     int64      `json:"server_id" db:"server_id"`
+	Commit       string     `json:"commit"`
+	CreatedAt    JsonTime   `json:"created_at" db:"created_at"`
+	EndedAt      JsonTime   `json:"ended_at" db:"ended_at"`
+	DeployUser   DeployUser `json:"deploy_user" db:"deploy_user"`
+	Stdout       NullString `json:"stdout"`
+	Stderr       NullString `json:"stderr"`
 	DeployServer *DeployServer
 }
 
