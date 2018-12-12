@@ -36,7 +36,7 @@ func CreateDeployRecord(DeployQueue chan int64) gin.HandlerFunc {
 		deployRecord := model.DeployRecord{
 			Status:     "waiting",
 			ServerID:   deployServer.ID,
-			Commit:     c.PostForm("head_commit"),
+			Compare:    c.PostForm("compare"),
 			DeployUser: deployUser,
 		}
 		if !deployRecord.Save() {

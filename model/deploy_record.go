@@ -26,7 +26,7 @@ type DeployRecord struct {
 	ID           int64      `json:"id"`
 	Status       string     `json:"status"`
 	ServerID     int64      `json:"server_id" db:"server_id"`
-	Commit       string     `json:"commit"`
+	Compare      string     `json:"compare"`
 	CreatedAt    JsonTime   `json:"created_at" db:"created_at"`
 	EndedAt      JsonTime   `json:"ended_at" db:"ended_at"`
 	DeployUser   DeployUser `json:"deploy_user" db:"deploy_user"`
@@ -48,8 +48,8 @@ func (dc *DeployRecord) Save() bool {
 	defer db.Close()
 
 	insertSql := `
-		INSERT INTO deploy_records (status, server_id, commit, created_at, deploy_user)
-		VALUES (:status, :server_id, :commit, :created_at, :deploy_user)
+		INSERT INTO deploy_records (status, server_id, compare, created_at, deploy_user)
+		VALUES (:status, :server_id, :compare, :created_at, :deploy_user)
 		RETURNING id
 	`
 	nstmt, err := db.PrepareNamed(insertSql)
