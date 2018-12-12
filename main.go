@@ -16,6 +16,8 @@ var DeployQueue = make(chan int64)
 func main() {
 	router := gin.Default()
 
+	router.Static("/v", "./static/dist")
+
 	router.Use(cors.New(cors.Config{
 		AllowAllOrigins:  true,
 		AllowMethods:     []string{"GET", "PATCH", "POST"},

@@ -1,3 +1,5 @@
 deploy.log
 .goreload
 config/settings.yml
+static/node_modules
+static/dist
