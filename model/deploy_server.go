@@ -56,7 +56,7 @@ func (ds *DeployServer) Save() bool {
 		ds.CreatedAt = JsonTime{time.Now()}
 	}
 	insertSql := `
-		INSERT INTO deploy_servers (name, branch, dir, cmd, created_at, deploy_repo_id, :options)
+		INSERT INTO deploy_servers (name, branch, dir, cmd, created_at, deploy_repo_id, options)
 		VALUES (:name, :dir, :branch, :cmd, :created_at, :deploy_repo_id, :options)
 		RETURNING id
 	`
