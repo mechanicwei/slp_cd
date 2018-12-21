@@ -13,3 +13,5 @@
 - payload数据加密，以保证请求来自Github
 - [x] 提醒：Skylark模板消息
 - [x] head_commit -> compare
+- 实时查看部署日志
+- 自定义端口
