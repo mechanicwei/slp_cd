@@ -1,6 +1,7 @@
 package route
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"slp_cd/model"
@@ -13,7 +14,11 @@ import (
 func CreateDeployRecord(DeployQueue chan int64) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		repoID, _ := strconv.ParseInt(c.Query("repo_id"), 10, 64)
-		ref := c.PostForm("ref")
+
+		payload := make(map[string]interface{})
+		json.NewDecoder(c.Request.Body).Decode(&payload)
+
+		ref := payload["ref"].(string)
 		branch, err := getBranch(ref)
 		if err != nil {
 			return
@@ -76,7 +81,7 @@ func GetDeployRecords(c *gin.Context) {
 
 func getBranch(ref string) (string, error) {
 	s := strings.Split(ref, "/")
-	if s[1] == "head" {
+	if s[1] == "heads" {
 		return s[2], nil
 	} else {
 		return "", errors.New("no branch")
